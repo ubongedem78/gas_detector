@@ -9,7 +9,7 @@ SoftwareSerial displaySerial(8, 9);  // Software Serial for display
 
 Adafruit_SSD1306 myDisplay(128, 64, &Wire); // OLED display
 
-String writeApiKey = "3DTMHW1H20UCVI7B"; // ThingSpeak API Key
+String writeApiKey = "api_key"; // ThingSpeak API Key
 
 const int gasThreshold = 70;
 
