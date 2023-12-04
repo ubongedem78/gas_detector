@@ -13,7 +13,7 @@ const int gasThreshold = 70;
 
 void setup() {
   Serial.begin(9600);
-  delay(6000);
+  delay(2000);
 
   pinMode(BUZZER_PIN, OUTPUT);
 
@@ -40,8 +40,8 @@ void loop() {
 
   updateDisplay(sensorValue);
 
-  Serial.print(F("Gas Value: "));
-  Serial.println(sensorValue);
+//  Serial.print(F("Gas Value: "));
+//  Serial.println(sensorValue);
 
   if (sensorValue > gasThreshold) {
     activateBuzzer();
@@ -49,16 +49,11 @@ void loop() {
     sendSMS(F("Gas detected! Take necessary action."));
     Serial.println("Sending to ThingSpeak...");
     sendToThingSpeak(sensorValue);
-    delay(15000);
+    delay(10000);
     deactivateBuzzer();
     Serial.println(F("Buzzer Deactivated"));
-    delay(7000);
+    delay(2000);
   }
-
-//   if (gpsSerial.available() > 0) {
-//    String gpsData = gpsSerial.readStringUntil('\n');
-//    Serial.println(gpsData);
-//  }
 
   delay(2000);
 }
@@ -79,67 +74,49 @@ void sendToThingSpeak(float gasValue) {
   delay(500);
 
   Serial.println(F("AT+CIPMUX=0"));
-  delay(2000);
+  delay(500);
 
   Serial.println(F("AT+CSTT=\"internet.ng.airtel.com\""));
-  delay(2000);
+  delay(500);
 
   Serial.println(F("AT+CIICR"));
-  delay(5000);
+  delay(500);
 
   Serial.println(F("AT+CIFSR"));
-  delay(2000);
+  delay(500);
 
   Serial.println(F("AT+CIPSTART=\"TCP\",\"api.thingspeak.com\",\"80\""));
-  delay(6000);
+  delay(5000);
 
-//  Serial.println(writeApiKey);
-//  Serial.println(gasValue);
-  noInterrupts();
-  Serial.println(F("AT+CIPSEND"));
-  delay(15000);
-  while (Serial.available()) {
-  Serial.write(Serial.read());
-}
-  
+  Serial.print(F("AT+CIPSEND"));
+  delay(5000);
   String str = "GET /update?api_key=" + writeApiKey +
                "&field1=" + String(gasValue);
 
   Serial.println(str);
-  delay(30000);
-  Serial.println((char)26);
-  delay(4000);
-  Serial.println();
-
-  while (Serial.available()) {
-    Serial.write(Serial.read());
-  }
+  delay(3000);
+  
+  Serial.write(26);
+  delay(5000);
 
   Serial.println(F("AT+CIPSHUT"));
-  delay(5000);
-  while (Serial.available()) {
-  Serial.write(Serial.read());
-  }
-  interrupts();
+  delay(500);
 }
 
 void sendSMS(String message) {
-  Serial.println(F("Sending SMS..."));
   Serial.println(F("AT+CMGF=1"));
-  delay(2000);
+  delay(3000);
   Serial.println(F("AT+CMGS=\"+2347082257453\""));
-  delay(100);
+  delay(1000);
   Serial.println(message);
   delay(100);
   Serial.write(26);
-  delay(100);
-  Serial.println();
   delay(5000); 
   Serial.println(F("SMS sent."));
 }
 
 void activateBuzzer() {
-   tone(BUZZER_PIN, 1000);
+//  tone(BUZZER_PIN, 1000);
 }
 
 
