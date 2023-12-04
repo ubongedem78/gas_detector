@@ -2,6 +2,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 
+
 Adafruit_SSD1306 myDisplay(128, 64, &Wire);
 
 String writeApiKey = "3DTMHW1H20UCVI7B";
@@ -9,11 +10,10 @@ String writeApiKey = "3DTMHW1H20UCVI7B";
 const int gasThreshold = 70;
 #define MQ2pin A0
 #define BUZZER_PIN 8
-int toneFrequency = 1000;
 
 void setup() {
   Serial.begin(9600);
-  delay(2000);
+  delay(6000);
 
   pinMode(BUZZER_PIN, OUTPUT);
 
@@ -31,6 +31,8 @@ void setup() {
   Serial.println(F("Warming up gas sensor..."));
   delay(10000);
   Serial.println(F("Gas sensor warmed up!"));
+
+
 }
 
 void loop() {
@@ -47,10 +49,16 @@ void loop() {
     sendSMS(F("Gas detected! Take necessary action."));
     Serial.println("Sending to ThingSpeak...");
     sendToThingSpeak(sensorValue);
+    delay(15000);
     deactivateBuzzer();
     Serial.println(F("Buzzer Deactivated"));
-    delay(7000);  // Wait before checking again
+    delay(7000);
   }
+
+//   if (gpsSerial.available() > 0) {
+//    String gpsData = gpsSerial.readStringUntil('\n');
+//    Serial.println(gpsData);
+//  }
 
   delay(2000);
 }
@@ -67,61 +75,58 @@ void updateDisplay(float value) {
 }
 
 void sendToThingSpeak(float gasValue) {
-  Serial.println(F("Closing existing connections..."));
   Serial.println(F("AT+CIPSHUT"));
   delay(500);
 
-  Serial.println(F("Setting single connection mode..."));
   Serial.println(F("AT+CIPMUX=0"));
-  delay(500);
+  delay(2000);
 
-  Serial.println(F("Setting APN..."));
   Serial.println(F("AT+CSTT=\"internet.ng.airtel.com\""));
   delay(2000);
 
-  Serial.println(F("Bringing up wireless connection..."));
   Serial.println(F("AT+CIICR"));
-  delay(2000);
+  delay(5000);
 
-  Serial.println(F("Getting local IP address..."));
   Serial.println(F("AT+CIFSR"));
   delay(2000);
 
-  Serial.println(F("Connecting to ThingSpeak..."));
   Serial.println(F("AT+CIPSTART=\"TCP\",\"api.thingspeak.com\",\"80\""));
-  delay(10000);
+  delay(6000);
 
-  Serial.println(writeApiKey);
-  Serial.println(gasValue);
+//  Serial.println(writeApiKey);
+//  Serial.println(gasValue);
+  noInterrupts();
+  Serial.println(F("AT+CIPSEND"));
+  delay(15000);
+  while (Serial.available()) {
+  Serial.write(Serial.read());
+}
   
-  String url = "GET /update?api_key=" + writeApiKey +
+  String str = "GET /update?api_key=" + writeApiKey +
                "&field1=" + String(gasValue);
 
-  Serial.print(F("Sending data: "));
-  Serial.println(url);
-  delay(2000);
-
-  Serial.println("Sending data to ThingSpeak...");
-  Serial.print(F("AT+CIPSEND="));
-  delay(500);
-
-  Serial.write(0x0D);
-  Serial.write(0x0A);
-  delay(8000);
+  Serial.println(str);
+  delay(30000);
+  Serial.println((char)26);
+  delay(4000);
+  Serial.println();
 
   while (Serial.available()) {
     Serial.write(Serial.read());
   }
 
-  Serial.println(F("Closing the connection..."));
   Serial.println(F("AT+CIPSHUT"));
-  delay(500);
+  delay(5000);
+  while (Serial.available()) {
+  Serial.write(Serial.read());
+  }
+  interrupts();
 }
 
 void sendSMS(String message) {
   Serial.println(F("Sending SMS..."));
   Serial.println(F("AT+CMGF=1"));
-  delay(100);
+  delay(2000);
   Serial.println(F("AT+CMGS=\"+2347082257453\""));
   delay(100);
   Serial.println(message);
@@ -134,8 +139,9 @@ void sendSMS(String message) {
 }
 
 void activateBuzzer() {
-  tone(BUZZER_PIN, toneFrequency);
+   tone(BUZZER_PIN, 1000);
 }
+
 
 void deactivateBuzzer() {
   noTone(BUZZER_PIN);
