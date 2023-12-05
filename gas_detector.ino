@@ -11,7 +11,7 @@ const int gpsRxPin = 2;
 const int gpsTxPin = 3;
 
 SoftwareSerial gpsSerial(gpsRxPin, gpsTxPin);
-const int gasThreshold = 75;
+const int gasThreshold = 80;
 TinyGPSPlus gps;
 #define I2C_ADDRESS 0x3C
 #define RST_PIN -1
@@ -37,6 +37,7 @@ void setup() {
   oled.set1X();
   oled.println("Gas Detection!");
   oled.println();
+  oled.println("Please Wait!");
 
   gsmSerial.begin(9600);
   delay(14000);
@@ -68,15 +69,14 @@ void loop() {
 void updateDisplay(float value) {
   oled.clear();
   oled.set1X();
-  //print gas value on oled
   oled.println(F("Gas Value: "));
   oled.println(value);
   oled.println();
   if (gps.location.isValid()) {
     oled.println(F("Latitude: "));
-    oled.println(gps.location.lat(), 6);
+    oled.println(gps.location.lat(), 4);
     oled.println(F("Longitude: "));
-    oled.println(gps.location.lng(), 6);
+    oled.println(gps.location.lng(), 3);
   } else {
     oled.println(F("No GPS fix available"));
   }
